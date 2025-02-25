@@ -1,5 +1,27 @@
 {
   "dependencies": {
-    "axios": "^1.7.9"
-  }
+    "axios": "^1.7.9",
+    "csv-parser": "^3.2.0",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security"
+  },
+  "name": "hajusrakenduse-alused",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lokr3m/hajusrakenduse-alused.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lokr3m/hajusrakenduse-alused/issues"
+  },
+  "homepage": "https://github.com/lokr3m/hajusrakenduse-alused#readme",
+  "description": ""
 }

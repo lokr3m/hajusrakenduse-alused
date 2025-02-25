@@ -70,3 +70,11 @@ they don't use port on ipv6, cause we can have billions of connection
 Header - contains extra data about connection and staff
 Accept-header: data that we want to receive back (what kind of formats web browser can read)
 Content-length: how much content (bytes) we send in the body, when we want to send binary data and we don't know how long is the message
+
+
+4 class:
+REST, or REpresentational State Transfer, is an architectural style for providing standards between computer systems on the web, making it easier for systems to communicate with each other.
+
+URL contains: protocol, domain, subdirectory, port, path, url fragment
+
+query parameters
