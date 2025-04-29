@@ -1,4 +1,4 @@
-1 class:
+#1 class:
 hajusrakendused - distributed systems - that works together - we can connect different languages in one programm
 Assembly
 Operating Systems
@@ -9,7 +9,7 @@ DSP - processor which works by signals
 Operating system detect and control hardware - it's their main goal
 
 
-2 class:
+#2 class:
 when we want to distribute computers all around the world, we need to use some tool to transfer data from one computer to another one
 IP (internet protocol) - is one way to connect computers - popular method
 TCP IP - transmission protocol
@@ -19,7 +19,7 @@ Windows SDK - write your own windows drivers or modify them
 Network card (physical microchip on motherboard) that sends electric impulses
 importing from libraries (network)
 
-3 class:
+#3 class:
 how to read code
 it's very important to read the code, as a beginner it's very cool to comment your code (why exactly this code is written here)
 even estonians try to write code on english
@@ -72,9 +72,42 @@ Accept-header: data that we want to receive back (what kind of formats web brows
 Content-length: how much content (bytes) we send in the body, when we want to send binary data and we don't know how long is the message
 
 
-4 class:
+#4 class:
 REST, or REpresentational State Transfer, is an architectural style for providing standards between computer systems on the web, making it easier for systems to communicate with each other.
 
 URL contains: protocol, domain, subdirectory, port, path, url fragment
 
 query parameters
+
+#5 class:
+attack web server
+
+SQL injection
+>>> `select * from products where name = '%{req.query.search}%'`
+>>> "select * from products where name = '%" + req.query.search + "%'"
+>>> password ='' where role='admin' --%'"
+>>> search = "car' ; UPDATE users SET password = '' WHERE role = 'admin' --"
+
+>>> how to defend: search = "car'' ; UPDATE users SET password = '''' WHERE role = 'admin' --"  ||| req.query.search.str_replace("'", "''")  --- bad method
+>>> let search = cleanSQL(req.query.search)
+
+>>> db.execute(
+    `SELECT * FROM products WHERE name = '%?%' AND created_at > ?`,
+    [req.query.search, req.query.start]
+)
+XSS Cross site scripting - unsecured inputs in public forms 
+>>> username, reviews, comment - most popular fields that will be attacked
+>>> removing tags from scripts 
+>>> clean html in asp.net - with that you can attack web server
+>>> on site where we have information, where we need to log in first, has low level of xss cross site scripting attack
+
+Brute force, both passwords and directory traversing
+>>> hackers have a few thousands of passwords and they try to log in
+>>> https://site.com/invoices/invoice-290420251054.pdf - you will be hacked pretty fast ||| need to put random data on the link ||| 32-64 random chars
+>>> how to defend: add rate limiting plugin/middleware ||| IP based rate limiting, 100 login requests per 1 min ||| how many login requests to put, depends from your users activity
+owasp top 10
+misconfigurations
+
+next time:
+CORS
+Cookie/token
