@@ -1,15 +1,15 @@
-function handleLogout() {
-    // Remove logged-in user's email from localStorage
-    localStorage.removeItem('loggedInUserEmail');
-   
-    // Redirect to the login page
-    window.location.href = 'index.html'; 
+// Logout user
+function logoutUser() {
+    localStorage.removeItem('authToken'); // Remove token from storage
+    token = null;
+    alert('Logged out successfully!');
+    window.location.href = 'index.html'; // Redirect to login page
 }
 
-// Attach event listener to the logout button
+// Attach event listener to logout button
 window.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener('click', logoutUser);
     }
 });

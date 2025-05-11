@@ -1,25 +1,31 @@
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();  // Prevent form submission
-
-    // Retrieve users from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault();  // Prevent default form submission
 
     // Get input values
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Find the user with matching credentials
-    const user = users.find(u => u.email === email && u.password === password);
+    try {
+        const response = await fetch('http://demo2.z-bit.ee/users/get-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: email, password: password })
+        });
 
-    // Simple validation
-    if (user) {
-        // Save the logged-in user's email in localStorage
-        localStorage.setItem('loggedInUserEmail', user.email);
+        const data = await response.json();
+        if (response.ok) {
+            // Store auth token in localStorage
+            localStorage.setItem('authToken', data.access_token);
 
-        // Redirect to tasklist.html if credentials are correct
-        window.location.href = 'tasklist.html';
-    } else {
-        // Show error message if credentials are incorrect
+            // Redirect to task list
+            window.location.href = 'tasklist.html';
+        } else {
+            document.getElementById('errorMessage').innerText = data.message || 'Login failed!';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        document.getElementById('errorMessage').innerText = 'Something went wrong. Please try again.';
         document.getElementById('errorMessage').style.display = 'block';
     }
 });

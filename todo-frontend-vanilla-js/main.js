@@ -1,133 +1,106 @@
-const loggedInUserEmail = localStorage.getItem('loggedInUserEmail');
-const tasksKey = `tasks-${loggedInUserEmail}`; // Unique key for each user
+// main.js - Handles user authentication & task management
 
-let tasks = [];
-let lastTaskId = 0;
-let taskList;
-let addTask;
+const API_URL = 'http://demo2.z-bit.ee';
+let token = localStorage.getItem('authToken');
 
-// When the page is loaded
-window.addEventListener('load', () => {
-    taskList = document.querySelector('#task-list');
-    addTask = document.querySelector('#add-task');
-
-    // Clear current tasks from the list
-    taskList.innerHTML = '';
-
-    // Load tasks from localStorage
-    loadTasks();
-
-    // Render each task on the page
-    tasks.forEach(renderTask);
-
-    // When the add task button is clicked
-    addTask.addEventListener('click', () => {
-        const task = createTask();
-        const taskRow = createTaskRow(task);
-        taskList.appendChild(taskRow);
-        saveTasks(); // Save updated tasks to localStorage
+// Register a new user
+async function registerUser(username, password, firstname = '', lastname = '') {
+    const response = await fetch(`http://demo2.z-bit.ee/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, newPassword: password, firstname, lastname })
     });
-});
-
-function loadTasks() {
-    const storedTasks = localStorage.getItem(tasksKey);
-    if (storedTasks) {
-        tasks = JSON.parse(storedTasks);
-        lastTaskId = tasks.length ? tasks[tasks.length - 1].id : 0;
+    const data = await response.json();
+    if (response.ok) {
+        alert('Registration successful! Please log in.');
     } else {
-        tasks = [];
-        lastTaskId = 0;
+        alert(`Error: ${data.message}`);
     }
 }
 
-function saveTasks() {
-    localStorage.setItem(tasksKey, JSON.stringify(tasks));
-}
-
-function renderTask(task) {
-    const taskRow = createTaskRow(task);
-    taskList.appendChild(taskRow);
-}
-
-function createTask() {
-    lastTaskId++;
-    const task = {
-        id: lastTaskId,
-        name: 'New task',
-        completed: false
-    };
-    tasks.push(task);
-    return task;
-}
-
-function createTaskRow(task) {
-    let taskRow = document.querySelector('[data-template="task-row"]').cloneNode(true);
-    taskRow.removeAttribute('data-template');
-
-    // Fill form fields with data
-    const name = taskRow.querySelector("[name='name']");
-    name.value = task.name;
-
-    const checkbox = taskRow.querySelector("[name='completed']");
-    checkbox.checked = task.completed;
-
-    // Add event listener to the delete button
-    const deleteButton = taskRow.querySelector('.delete-task');
-    deleteButton.addEventListener('click', () => {
-        taskList.removeChild(taskRow);
-        tasks = tasks.filter(t => t.id !== task.id); // Remove task from the array
-        saveTasks(); // Save updated tasks to localStorage
+// Login user
+async function loginUser(username, password) {
+    const response = await fetch(`http://demo2.z-bit.ee/users/get-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
     });
-
-    // Add event listener to the checkbox to update task completion
-    checkbox.addEventListener('change', () => {
-        task.completed = checkbox.checked;
-        saveTasks(); // Save updated tasks to localStorage
-    });
-
-    // Add event listener to the task name input to update task name
-    name.addEventListener('input', () => {
-        task.name = name.value;
-        saveTasks(); // Save updated tasks to localStorage
-    });
-
-    // Prepare custom-designed checkboxes for interaction
-    hydrateAntCheckboxes(taskRow);
-
-    return taskRow;
-}
-
-function createAntCheckbox() {
-    const checkbox = document.querySelector('[data-template="ant-checkbox"]').cloneNode(true);
-    checkbox.removeAttribute('data-template');
-    hydrateAntCheckboxes(checkbox);
-    return checkbox;
-}
-
-/**
- * This function helps add necessary event listeners to custom-designed checkboxes
- * @param {HTMLElement} element Checkbox wrapper element or container element containing multiple checkboxes
- */
-function hydrateAntCheckboxes(element) {
-    const elements = element.querySelectorAll('.ant-checkbox-wrapper');
-    for (let i = 0; i < elements.length; i++) {
-        let wrapper = elements[i];
-
-        // Skip if already processed
-        if (wrapper.__hydrated) continue;
-        wrapper.__hydrated = true;
-
-        const checkbox = wrapper.querySelector('.ant-checkbox');
-
-        // Check if checkbox should already be checked (custom checkbox design)
-        const input = wrapper.querySelector('.ant-checkbox-input');
-        if (input.checked) {
-            checkbox.classList.add('ant-checkbox-checked');
-        }
-        
-        // Update checkbox design on click
-        input.addEventListener('change', () => {
-            checkbox.classList.toggle('ant-checkbox-checked');
-        });
+    const data = await response.json();
+    if (response.ok) {
+        token = data.access_token;
+        localStorage.setItem('authToken', token);
+        fetchTasks();
+    } else {
+        alert(`Login failed: ${data.message}`);
     }
 }
+
+// Logout user
+function logoutUser() {
+    localStorage.removeItem('authToken');
+    token = null;
+    alert('Logged out successfully!');
+}
+
+// Fetch tasks and display them
+async function fetchTasks() {
+    if (!token) return;
+    const response = await fetch(`$http://demo2.z-bit.ee/tasks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const tasks = await response.json();
+    renderTasks(tasks);
+}
+
+// Add new task
+async function addTask(title, desc = "") {
+    const response = await fetch(`$http://demo2.z-bit.ee/tasks`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, desc })
+    });
+    if (response.ok) fetchTasks();
+}
+
+// Update task (mark as done or change title)
+async function updateTask(id, updatedData) {
+    await fetch(`$http://demo2.z-bit.ee/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+    });
+    fetchTasks();
+}
+
+// Delete task
+async function deleteTask(id) {
+    await fetch(`http://demo2.z-bit.ee/tasks/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    fetchTasks();
+}
+
+// Render tasks in UI
+function renderTasks(tasks) {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+    tasks.forEach(task => {
+        const taskItem = document.createElement('li');
+        taskItem.innerHTML = `
+            <span>${task.title} - ${task.marked_as_done ? '✅' : '❌'}</span>
+            <button onclick="updateTask(${task.id}, { marked_as_done: ${!task.marked_as_done} })">Toggle</button>
+            <button onclick="deleteTask(${task.id})">Delete</button>
+        `;
+        taskList.appendChild(taskItem);
+    });
+}
+
+// Initialize
+if (token) fetchTasks();

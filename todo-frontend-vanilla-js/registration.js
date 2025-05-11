@@ -1,5 +1,5 @@
-document.getElementById('registerForm').addEventListener('submit', function(event) {
-    event.preventDefault();  // Prevent the form from submitting
+document.getElementById('registerForm').addEventListener('submit', async function(event) {
+    event.preventDefault();  // Prevent default form submission
 
     // Collect the form data
     const email = document.getElementById('email').value;
@@ -7,33 +7,27 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     const lastName = document.getElementById('lastName').value;
     const password = document.getElementById('password').value;
 
-    // Retrieve existing users from localStorage
-    let users = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+        const response = await fetch('http://demo2.z-bit.ee/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: email,
+                newPassword: password,
+                firstname: firstName,
+                lastname: lastName
+            })
+        });
 
-    // Check if the email already exists
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-        alert('User already registered. Please log in.');
-        return;
+        const data = await response.json();
+        if (response.ok) {
+            alert('Registration successful! Redirecting to login...');
+            window.location.href = 'index.html';  // Redirect to login page
+        } else {
+            alert(`Error: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        alert('Something went wrong. Please try again.');
     }
-
-    // Create a new user object
-    const user = {
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        password: password
-    };
-
-    // Add new user to the array
-    users.push(user);
-
-    // Save updated users array to localStorage
-    localStorage.setItem('users', JSON.stringify(users));
-
-    // Simulate successful registration
-    alert('Registration successful! Redirecting to login page...');
-
-    // Redirect to index.html (the login page) after successful registration
-    window.location.href = 'index.html';
 });
