@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { getTasks, addTask, updateTask, deleteTask, login, register, getToken, clearToken } from "./api";
 import AuthForm from "./AuthForm";
 
+/// ... - spread operator or rest operator
+
 function App() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]); // array with tasks
   const [newTask, setNewTask] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
 
+  // side effects - check are we logged in or not
   useEffect(() => {
     if (!isLoggedIn) return;
     getTasks().then(setTasks).catch(() => {
@@ -18,19 +21,22 @@ function App() {
   const handleAdd = async () => {
     if (newTask.trim() === "") return;
     const task = await addTask(newTask);
-    setTasks([...tasks, task]);
+    setTasks([...tasks, task]); // copy array from line 8 and add new task
     setNewTask("");
   };
 
   const handleUpdate = async (task, changes) => {
     const updatedTask = { ...task, ...changes };
-    await updateTask(task.id, changes); // Correct usage!
+    await updateTask(task.id, changes);
     setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
+    // tasks.map - checking every element, updatedTask : t = if-else
   };
 
   const handleDelete = async (id) => {
     await deleteTask(id);
     setTasks(tasks.filter(t => t.id !== id));
+    // !== - checking that we dont have this id
+    // filter - only true elements = what we want to delete
   };
 
   const handleLogout = () => {
@@ -39,11 +45,13 @@ function App() {
     setTasks([]);
   };
 
+  // Logged out
   if (!isLoggedIn) {
     return <AuthForm onAuth={() => setIsLoggedIn(true)} />;
   }
 
   return (
+    // Logged in
     <div>
       <button onClick={handleLogout}>Log Out</button>
       <h1>To-Do List</h1>

@@ -1,7 +1,8 @@
 const BASE_URL = "https://demo2.z-bit.ee";
 
+// we are creating token for communication with api and for security
+// how it works: 1. server receive our info, 2. checks it in database, 3. creates JWT (json) token, 4. sends token to us
 
-// Helper functions to manage token
 export function getToken() {
   return localStorage.getItem("api_token");
 }
@@ -16,7 +17,7 @@ export function clearToken() {
 
 // Registration: POST /users
 export async function register(username, firstname, lastname, password) {
-  const response = await fetch(`${BASE_URL}/users`, {
+  const response = await fetch(`${BASE_URL}/users`, { // $ - means to put url there
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -31,6 +32,7 @@ export async function register(username, firstname, lastname, password) {
     throw new Error(error || "Registration failed");
   }
   const data = await response.json();
+  // Here we are taking our token
   if (!data.access_token) throw new Error("No token returned");
   setToken(data.access_token);
   return data;
@@ -48,6 +50,7 @@ export async function login(username, password) {
     throw new Error(error || "Login failed");
   }
   const data = await response.json();
+  // Here we also are getting token
   if (!data.access_token) throw new Error("No token returned");
   setToken(data.access_token);
   return data;
@@ -79,6 +82,10 @@ export async function updateProfile(id, updates) {
 }
 
 // TASK CRUD
+// C - Create
+// R - Read
+// U - Update
+// D - Delete
 
 // Get all tasks (GET /tasks)
 export async function getTasks() {
